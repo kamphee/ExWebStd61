@@ -9,6 +9,8 @@ https://fontawesome.com/v4.7.0/icons/
 
 การจอยตาราง 2 ตาราง
 select * from tbl_member t1,tbl_title t2 where t1.id=t2.id
+หรือ
+SELECT * FROM tbl_title t1 INNER JOIN tbl_member m2 ON t1.id=m2.id
 
 การจอยตาราง 3 ตาราง
 select * from 
@@ -18,3 +20,6 @@ select * from
 		      t1.id=t2.id 
 	     and  
 		       tb2.id=tb3.id 
+			   
+			   
+			   

@@ -5,6 +5,7 @@ $reck = $mysqli->query($q); // ทำการ query คำสั่ง sql
 $rsc=$reck->fetch_object();
 @$id = $rsc->id;
 @$title_id = $rsc->title_id;
+@$title = $rsc->title;
 @$lname = $rsc->lname;
 @$fname = $rsc->fname;
 @$email = $rsc->email;
@@ -13,7 +14,9 @@ $rsc=$reck->fetch_object();
 @$u_name = $rsc->u_name;
 @$u_pass = $rsc->u_pass;
 @$u_type = $rsc->u_type;
+
 }
+	  
 
 /*
 เราใช้ page2.php เป็นทั้งไฟล์ที่ทำการแสดงผลและบันทึกข้อมูลกระทู้ใหม่
@@ -284,12 +287,10 @@ lname เป็น textarea
       echo 'has-error';
     }
     ?>">
+	
       <label for="title_idInput" class="col-sm-4 control-label">*คำนำหน้าชื่อ</label>
       <div class="col-sm-4">
-	  <?php 
-		$qt="SELECT * FROM {$prefix}_title"; //
-		$reckt = $mysqli->query($qt); // ทำการ query คำสั่ง sql
-	  ?>
+        	  
 		<select class="form-control" name="title_id">
 				<option value="
 			<?php echo htmlspecialchars($DATA['title_id'], ENT_QUOTES, 'UTF-8');?>"
@@ -297,15 +298,19 @@ lname เป็น textarea
           spellcheck="false"
           class="form-control"
 			">
-			เลือกรายการ
+			เลือกรายการ 
 		</option>
-		
+		<?php 
+		$qt="SELECT * FROM {$prefix}_title"; //
+		$reckt = $mysqli->query($qt); // ทำการ query คำสั่ง sql
+	  ?>
 		<?php while($rsct=$reckt->fetch_object()){ ?>
 			<option value="<?=$rsct->id?>">
 			<?=$rsct->title ?>
 			</option>
 		<?php } ?>	
 		</select>
+		
       </div>
     </div>
 	
@@ -543,7 +548,7 @@ lname เป็น textarea
     <div class="panel-heading">
       <h4>
         <span class="glyphicon glyphicon-pencil"></span>
-          <?php echo form_reg;?>
+          <?php echo page1;?>
       </h4>
     </div>
     <div class="panel-body">
@@ -665,19 +670,28 @@ $total=$result->num_rows;  // นับจำนวนถวที่แสด�
         <thead>
             <tr>
                 <th>#</th>
-                <th>หัวข้อ</th>
-                <th>รายละเอียด</th>
-                <th>ผู้เขียน</th>
+                <th>ชื่อ</th>
+                <th>นามสกุล</th>
+                <th>สิทธิ</th>
                 <th>แสดง</th>
             </tr>
         </thead>
         <tbody>
-		<?php  $n=1;    while($rs=$result->fetch_object()){ // วนลูปแสดงข้อมูล   ?>
+		<?php  $n=1;    while($rs=$result->fetch_object()){ // วนลูปแสดงข้อมูล 
+                        $title_id = $rs->title_id;  
+		?>
             <tr>
 			<td><?php echo $n++; ?></td>
-                <td><?php echo $rs->title_id; ?></td>
-                <td><?php echo $rs->lname; ?></td>
+                <td>
+				<?php 
+					$qt="SELECT * FROM {$prefix}_title WHERE id ='$title_id'"; //
+					$resultt = $mysqli->query($qt); // ทำการ query คำสั่ง sql
+					while($rst=$resultt->fetch_object()){ // วนลูปแสดงข้อมูล
+				?>
+				<?php echo $rst->title; ?><?php }?><?php echo $rs->lname; ?>
+				</td>
                 <td><?php echo $rs->fname; ?></td>
+                <td> <?php echo $rs->u_type; ?></td>
                 <td>
         <a class="btn btn-info btn-xs edit_data" href="?url=form_reg&add=<?php echo $rs->id; ?>">แก้ไข</a>
         <a class="btn btn-info btn-xs del_data" href="?url=form_reg&del=<?php echo $rs->id; ?>">ลบ</a>
@@ -689,9 +703,9 @@ $total=$result->num_rows;  // นับจำนวนถวที่แสด�
         <tfoot>
             <tr>
                 <th>#</th>
-                <th>หัวข้อ</th>
-                <th>รายละเอียด</th>
-                <th>ผู้เขียน</th>
+                <th>ชื่อ</th>
+                <th>นามสกุล</th>
+                <th>สิทธิ</th>
                 <th>แสดง</th>
             </tr>
         </tfoot>
@@ -702,108 +716,3 @@ $total=$result->num_rows;  // นับจำนวนถวที่แสด�
 <!-- จบฟอร์มแสดงข้อมูล-->
 
 <?php } ?>
-
-
-<div id="dataModal" class="modal fade" data-backdrop="false" role="dialog">
-     <div class="modal-dialog">
-          <div class="modal-content">
-               <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title_id">รายละเอียดพนักงาน</h4>
-               </div>
-               <div class="modal-body" id="title_id_detail">
-               </div>
-               <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">ปิด</button>
-               </div>
-          </div>
-     </div>
-</div>
-
-<div id="add_data_Modal" class="modal fade" data-backdrop="false" role="dialog">
-     <div class="modal-dialog">
-          <div class="modal-content">
-               <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title_id">PHP Ajax Update MySQL Data Through Bootstrap Modal</h4>
-               </div>
-               <div class="modal-body">
-                    <form method="post" id="insert_form">
-                      <div class="form-group <?php
-                      /*
-                      ถ้ามี key ชื่อ 'title_id' อยู่ใน array $FORM_ERRORS
-                      ให้เพิ่ม class 'has-error' เข้าไปใน <div> นี้
-                      */
-                      if (isset($FORM_ERRORS['title_id'])) {
-                        echo 'has-error';
-                      }
-                      ?>">
-                         <label>*หัวข้อ</label>
-                         <input
-                                type="text"
-                                id="title_id"
-                                name="title_id"
-                                value="<?php
-                                echo htmlspecialchars($DATA['title_id'], ENT_QUOTES, 'UTF-8');
-                                ?>"
-                                placeholder="หัวข้อ"
-                                spellcheck="false"
-                                class="form-control"
-                              >
-                            </div>
-                            <div class="form-group <?php
-                            /*
-                            ถ้ามี key ชื่อ 'title_id' อยู่ใน array $FORM_ERRORS
-                            ให้เพิ่ม class 'has-error' เข้าไปใน <div> นี้
-                            */
-                            if (isset($FORM_ERRORS['lname'])) {
-                              echo 'has-error';
-                            }
-                            ?>">
-                               <label>*รายละเอียด</label>
-                               <textarea
-                                    id="lname"
-                                    name="lname"
-                                    rows="5"
-                                    placeholder="รายละเอียด"
-                                    spellcheck="false"
-                                    class="form-control"
-                                  ><?php
-                                  echo htmlspecialchars($DATA['lname'], ENT_QUOTES, 'UTF-8');
-                                  ?></textarea>
-                                  </div>
-
-                                  <div class="form-group <?php
-                                  /*
-                                  ถ้ามี key ชื่อ 'title_id' อยู่ใน array $FORM_ERRORS
-                                  ให้เพิ่ม class 'has-error' เข้าไปใน <div> นี้
-                                  */
-                                  if (isset($FORM_ERRORS['name'])) {
-                                    echo 'has-error';
-                                  }
-                                  ?>">
-                                     <label>*ชื่อ</label>
-                                     <input
-                                            type="text"
-                                            id="name"
-                                            name="name"
-                                            value="<?php
-                                            echo htmlspecialchars($DATA['name'], ENT_QUOTES, 'UTF-8');
-                                            ?>"
-                                            placeholder="ชื่อ"
-                                            spellcheck="false"
-                                            class="form-control"
-                                          >
-                                        </div>
-                         <input type="hidden" name="work01_id" id="work01_id" />
-
-               </div>
-               <div class="modal-footer">
-               <input type="submit" name="insert" id="insert" value="บันทึก" class="btn btn-success" />
-                    </form>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">ปิด</button>
-               </div>
-          </div>
-     </div>
-</div>
-<hr>
