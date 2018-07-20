@@ -17,6 +17,8 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
 CREATE SCHEMA IF NOT EXISTS `db_workshow` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ;
 USE `db_workshow` ;
 
+DROP TABLE `tbl_member`, `tbl_product`, `tbl_title`, `tbl_type`, `tbl_work`;
+
 -- -----------------------------------------------------
 -- Table `db_workshow`.`{prefix}_work`
 -- -----------------------------------------------------
