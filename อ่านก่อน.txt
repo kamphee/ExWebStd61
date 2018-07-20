@@ -1,0 +1,20 @@
+https://fontawesome.com/v4.7.0/icons/
+
+<i class="fa fa-calendar-o" aria-hidden="true"></i>
+
+ติดตั้งโปรแกรม
+1. https://git-scm.com/ 
+2. https://github.com/
+3. GitHub Desktop
+
+การจอยตาราง 2 ตาราง
+select * from tbl_member t1,tbl_title t2 where t1.id=t2.id
+
+การจอยตาราง 3 ตาราง
+select * from 
+              tbl_member t1,
+			  tbl_title t2 
+	    where 
+		      t1.id=t2.id 
+	     and  
+		       tb2.id=tb3.id 
