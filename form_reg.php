@@ -286,17 +286,26 @@ lname เป็น textarea
     ?>">
       <label for="title_idInput" class="col-sm-4 control-label">*คำนำหน้าชื่อ</label>
       <div class="col-sm-4">
-        <input
-          type="text"
-          id="title_id"
-          name="title_id"
-          value="<?php
-          echo htmlspecialchars($DATA['title_id'], ENT_QUOTES, 'UTF-8');
-          ?>"
+	  <?php 
+		$qt="SELECT * FROM {$prefix}_title"; //
+		$reckt = $mysqli->query($qt); // ทำการ query คำสั่ง sql
+	  ?>
+		<select class="form-control" name="title_id">
+				<option value="
+			<?php echo htmlspecialchars($DATA['title_id'], ENT_QUOTES, 'UTF-8');?>"
           placeholder="คำนำหน้าชื่อ"
           spellcheck="false"
           class="form-control"
-        >
+			">
+			เลือกรายการ
+		</option>
+		
+		<?php while($rsct=$reckt->fetch_object()){ ?>
+			<option value="<?=$rsct->id?>">
+			<?=$rsct->title ?>
+			</option>
+		<?php } ?>	
+		</select>
       </div>
     </div>
 	
