@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `db_workshow`.`{prefix}_member` (
   `address` TEXT NOT NULL COMMENT '',
   `u_name` VARCHAR(20) NOT NULL COMMENT '',
   `u_pass` VARCHAR(45) NOT NULL COMMENT '',
-  `type` ENUM('admin', 'user') NOT NULL COMMENT '',
+  `u_type` ENUM('admin', 'user') NOT NULL COMMENT '',
   PRIMARY KEY (`id`)  COMMENT '',
   INDEX `fk_{prefix}_member_{prefix}_title_idx` (`title_id` ASC)  COMMENT '',
   CONSTRAINT `fk_{prefix}_member_{prefix}_title`
