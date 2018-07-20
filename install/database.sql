@@ -46,6 +46,14 @@ CREATE TABLE IF NOT EXISTS `db_workshow`.`{prefix}_title` (
   PRIMARY KEY (`id`)  COMMENT '')
 ENGINE = InnoDB;
 
+--
+-- Dumping data for table `{prefix}_title`
+--
+
+INSERT INTO `{prefix}_title` (`id`, `title`) VALUES
+(1, 'นาย'),
+(2, 'นาง'),
+(3, 'นางสาว');
 
 -- -----------------------------------------------------
 -- Table `db_workshow`.`{prefix}_member`
