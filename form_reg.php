@@ -1,8 +1,9 @@
 <?php
 if(isset($_GET['add'])){ #แสดงค่าที่กด
-$q="SELECT * FROM {$prefix}_member WHERE id = '".$_GET['add']."'"; //
+$q="SELECT * FROM {$prefix}_title T1,{$prefix}_member M1 WHERE T1.id = M1.title_id and M1.id = '".$_GET['add']."'"; //
 $reck = $mysqli->query($q); // ทำการ query คำสั่ง sql
 $rsc=$reck->fetch_object();
+print_r($rsc);
 @$id = $rsc->id;
 @$title_id = $rsc->title_id;
 @$title = $rsc->title;
@@ -229,6 +230,7 @@ if($_GET['add']=="add"){ #แสดงค่าที่กด
   */
   @$DATA = array(
     'title_id' => $title_id,
+	'title' => $title,
     'lname'    => $lname,
     'fname'    => $fname,
 	'email'    => $email,
@@ -298,7 +300,9 @@ lname เป็น textarea
           spellcheck="false"
           class="form-control"
 			">
-			เลือกรายการ 
+			<?php if(!empty($DATA['title'])){ ?>
+			     <?php echo $DATA['title']?>
+			<?php }else{ echo "เลือกรายการ"; }?>	 
 		</option>
 		<?php 
 		$qt="SELECT * FROM {$prefix}_title"; //
@@ -593,7 +597,7 @@ lname เป็น textarea
         echo 'has-error';
       }
       ?>">
-        <label for="lnameInput" class="col-sm-4 control-label">*ฃรายละเอียด</label>
+        <label for="lnameInput" class="col-sm-4 control-label">*รายละเอียด</label>
         <div class="col-sm-4">
           <textarea
                id="lname"
@@ -712,7 +716,7 @@ $total=$result->num_rows;  // นับจำนวนถวที่แสด�
 <?php } ?>
 <?php
 /*
-$qx="SELECT * FROM {$prefix}_title T1,{$prefix}_member M1 WHERE T1.id = M1.title_id ORDER BY M1.id DESC"; //
+$qx="SELECT * FROM {$prefix}_title T1,{$prefix}_member M1 WHERE T1.id = M1.title_id and M1.id = '7'"; //"; //
 $reckx = $mysqli->query($qx); // ทำการ query คำสั่ง sql
 $rscx=$reckx->fetch_object();
 print_r($rscx);
