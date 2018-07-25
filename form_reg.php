@@ -651,7 +651,7 @@ lname เป็น textarea
 
 <?php
 $i=1;
-$q="SELECT * FROM {$prefix}_member ORDER BY id DESC"; //
+$q="SELECT * FROM {$prefix}_title T1,{$prefix}_member M1 WHERE T1.id = M1.title_id ORDER BY M1.id DESC"; //
 $result = $mysqli->query($q); // ทำการ query คำสั่ง sql
 $total=$result->num_rows;  // นับจำนวนถวที่แสดง ทั้งหมด
 ?>
@@ -678,17 +678,11 @@ $total=$result->num_rows;  // นับจำนวนถวที่แสด�
         </thead>
         <tbody>
 		<?php  $n=1;    while($rs=$result->fetch_object()){ // วนลูปแสดงข้อมูล 
-                        $title_id = $rs->title_id;  
 		?>
             <tr>
 			<td><?php echo $n++; ?></td>
                 <td>
-				<?php 
-					$qt="SELECT * FROM {$prefix}_title WHERE id ='$title_id'"; //
-					$resultt = $mysqli->query($qt); // ทำการ query คำสั่ง sql
-					while($rst=$resultt->fetch_object()){ // วนลูปแสดงข้อมูล
-				?>
-				<?php echo $rst->title; ?><?php }?><?php echo $rs->lname; ?>
+				<?php echo $rs->title; ?><?php echo $rs->lname; ?>
 				</td>
                 <td><?php echo $rs->fname; ?></td>
                 <td> <?php echo $rs->u_type; ?></td>
@@ -716,3 +710,11 @@ $total=$result->num_rows;  // นับจำนวนถวที่แสด�
 <!-- จบฟอร์มแสดงข้อมูล-->
 
 <?php } ?>
+<?php
+/*
+$qx="SELECT * FROM {$prefix}_title T1,{$prefix}_member M1 WHERE T1.id = M1.title_id ORDER BY M1.id DESC"; //
+$reckx = $mysqli->query($qx); // ทำการ query คำสั่ง sql
+$rscx=$reckx->fetch_object();
+print_r($rscx);
+*/
+?>
