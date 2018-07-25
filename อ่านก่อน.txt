@@ -2,11 +2,10 @@ https://fontawesome.com/v4.7.0/icons/
 
 <i class="fa fa-calendar-o" aria-hidden="true"></i>
 
-�Դ��������
+ติดตั้งโปรแกรม
 1. https://git-scm.com/ 
 2. https://github.com/
 3. GitHub Desktop
 
-��è�µ��ҧ 2 ���ҧ
+การจอยตาราง 2 ตาราง
 SELECT * FROM tbl_title T1,tbl_member M1 WHERE T1.id = M1.title_id ORDER BY M1.id DESC";
-			   
