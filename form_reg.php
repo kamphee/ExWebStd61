@@ -1,6 +1,10 @@
 <?php
 if(isset($_GET['add'])){ #แสดงค่าที่กด
-$q="SELECT * FROM {$prefix}_title T1,{$prefix}_member M1 WHERE T1.id = M1.title_id and M1.id = '".$_GET['add']."'"; //
+$q="SELECT * FROM {$prefix}_member M1 
+				LEFT JOIN {$prefix}_title T1 ON (M1.title_id=T1.id)
+				LEFT JOIN {$prefix}_dep D1 ON (M1.dep_id=D1.id)
+		WHERE 
+		        M1.id = '".$_GET['add']."'"; //	
 $reck = $mysqli->query($q); // ทำการ query คำสั่ง sql
 $rsc=$reck->fetch_object();
 print_r($rsc);
@@ -9,6 +13,8 @@ print_r($rsc);
 @$title = $rsc->title;
 @$lname = $rsc->lname;
 @$fname = $rsc->fname;
+@$dep_id = $rsc->dep_id;
+@$dep = $rsc->dep;
 @$email = $rsc->email;
 @$tel = $rsc->tel;
 @$address = $rsc->address;
@@ -29,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   ตรวจสอบให้แน่ชัดว่ามีข้อมูลที่จำเป็นส่งมาครบหรือไม่ด้วย isset()
   ซึ่งจะเป็นจริงหากใน $_POST มี key ที่ต้องการครบ
   */
-  if (!isset($_POST['title_id'], $_POST['lname'], $_POST['fname'] ,$_POST['email'] ,$_POST['tel'] ,$_POST['address'] ,$_POST['u_name'] ,$_POST['u_pass'])) {
+  if (!isset($_POST['title_id'], $_POST['lname'], $_POST['fname'] ,$_POST['dep_id'], $_POST['email'] ,$_POST['tel'] ,$_POST['address'] ,$_POST['u_name'] ,$_POST['u_pass'])) {
     /*
     หากไม่ครบก็ให้ redirect ไปที่ index.php?form_reg=form_reg&add=add
     */
@@ -89,6 +95,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   } elseif (mb_strlen($DATA['fname'], 'UTF-8') > 64) {
     $FORM_ERRORS['fname'] = "'นามสกุล' ต้องมีความยาวไม่เกิน 64 ตัวอักษร";
   }
+
+   if ($DATA['dep_id'] === '') {
+    $FORM_ERRORS['dep_id'] = "กรุณาระบุ 'แผนกวิชา'";
+  } elseif (mb_strlen($DATA['dep_id'], 'UTF-8') > 255) {
+    $FORM_ERRORS['dep_id'] = "'แผนกวิชา' ต้องมีความยาวไม่เกิน 255 ตัวอักษร";
+  }
+
   
     if ($DATA['email'] === '') {
     $FORM_ERRORS['email'] = "กรุณาระบุ 'อีเมลล์'";
@@ -153,6 +166,7 @@ if($_GET['add']=="add"){ #แสดงค่าที่กด
         title_id,
         lname,
         fname,
+		dep_id,
 		email,
 		tel,
 		address,
@@ -165,6 +179,7 @@ if($_GET['add']=="add"){ #แสดงค่าที่กด
         '{$mysqli->escape_string($DATA['title_id'])}',
         '{$mysqli->escape_string($DATA['lname'])}',
         '{$mysqli->escape_string($DATA['fname'])}',
+		'{$mysqli->escape_string($DATA['dep_id'])}',
 		'{$mysqli->escape_string($DATA['email'])}',
 		'{$mysqli->escape_string($DATA['tel'])}',
 		'{$mysqli->escape_string($DATA['address'])}',
@@ -192,6 +207,7 @@ if($_GET['add']=="add"){ #แสดงค่าที่กด
 		title_id = '{$mysqli->escape_string($DATA['title_id'])}',
         lname    = '{$mysqli->escape_string($DATA['lname'])}',
         fname    = '{$mysqli->escape_string($DATA['fname'])}',
+		dep_id   = '{$mysqli->escape_string($DATA['dep_id'])}',
 		email    = '{$mysqli->escape_string($DATA['email'])}',
 		tel      = '{$mysqli->escape_string($DATA['tel'])}',
 		address  = '{$mysqli->escape_string($DATA['address'])}',
@@ -230,9 +246,11 @@ if($_GET['add']=="add"){ #แสดงค่าที่กด
   */
   @$DATA = array(
     'title_id' => $title_id,
-	'title' => $title,
+	'title'    => $title,
     'lname'    => $lname,
     'fname'    => $fname,
+    'dep_id'   => $dep_id,
+	'dep'      => $dep,
 	'email'    => $email,
 	'tel'      => $tel,
 	'address'  => $address,
@@ -293,7 +311,7 @@ lname เป็น textarea
       <label for="title_idInput" class="col-sm-4 control-label">*คำนำหน้าชื่อ</label>
       <div class="col-sm-4">
         	  
-		<select class="form-control" name="title_id">
+		<select class="form-control" name="title_id" <?php if(isset($_GET['del'])){?> disabled <?php }?>>
 				<option value="
 			<?php echo htmlspecialchars($DATA['title_id'], ENT_QUOTES, 'UTF-8');?>"
           placeholder="คำนำหน้าชื่อ"
@@ -339,6 +357,7 @@ lname เป็น textarea
           placeholder="ชื่อ"
           spellcheck="false"
           class="form-control"
+		  <?php if(isset($_GET['del'])){?> disabled <?php }?>
         >
       </div>
     </div>
@@ -364,10 +383,49 @@ lname เป็น textarea
           placeholder="นามสกุล"
           spellcheck="false"
           class="form-control"
+		  <?php if(isset($_GET['del'])){?> disabled <?php }?>
         >
       </div>
     </div>	
 
+		<div class="form-group <?php
+    /*
+    ถ้ามี key ชื่อ 'dep_id' อยู่ใน array $FORM_ERRORS
+    ให้เพิ่ม class 'has-error' เข้าไปใน <div> นี้
+    */
+    if (isset($FORM_ERRORS['dep_id'])) {
+      echo 'has-error';
+    }
+    ?>">
+	
+      <label for="dep_idInput" class="col-sm-4 control-label">*แผนกวิชา</label>
+      <div class="col-sm-4">
+        	  
+		<select class="form-control" name="dep_id" <?php if(isset($_GET['del'])){?> disabled <?php }?>>
+				<option value="
+			<?php echo htmlspecialchars($DATA['dep_id'], ENT_QUOTES, 'UTF-8');?>"
+          placeholder="แผนกวิชา"
+          spellcheck="false"
+          class="form-control"
+			">
+			<?php if(!empty($DATA['dep'])){ ?>
+			     <?php echo $DATA['dep']?>
+			<?php }else{ echo "เลือกรายการ"; }?>	 
+		</option>
+		<?php 
+		$qt="SELECT * FROM {$prefix}_dep"; //
+		$reckt = $mysqli->query($qt); // ทำการ query คำสั่ง sql
+	  ?>
+		<?php while($rsct=$reckt->fetch_object()){ ?>
+			<option value="<?=$rsct->id?>">
+			<?=$rsct->dep ?>
+			</option>
+		<?php } ?>	
+		</select>
+		
+      </div>
+    </div>
+	
 <div class="form-group <?php
     /*
     ถ้ามี key ชื่อ 'email' อยู่ใน array $FORM_ERRORS
@@ -389,6 +447,7 @@ lname เป็น textarea
           placeholder="อีเมลล์"
           spellcheck="false"
           class="form-control"
+		  <?php if(isset($_GET['del'])){?> disabled <?php }?>
         >
       </div>
     </div>	
@@ -414,6 +473,7 @@ lname เป็น textarea
           placeholder="เบอร์โทร"
           spellcheck="false"
           class="form-control"
+		  <?php if(isset($_GET['del'])){?> disabled <?php }?>
         >
       </div>
     </div>	
@@ -436,6 +496,7 @@ lname เป็น textarea
              placeholder="ที่อยู่"
              spellcheck="false"
              class="form-control"
+			 <?php if(isset($_GET['del'])){?> disabled <?php }?>
            ><?php
            echo htmlspecialchars($DATA['address'], ENT_QUOTES, 'UTF-8');
            ?></textarea>
@@ -463,6 +524,7 @@ lname เป็น textarea
           placeholder="ชื่อผู้ใช้ระบบ"
           spellcheck="false"
           class="form-control"
+		  <?php if(isset($_GET['del'])){?> disabled <?php }?>
         >
       </div>
     </div>
@@ -488,6 +550,7 @@ lname เป็น textarea
           placeholder="รหัสผ่านเข้าระบบ"
           spellcheck="false"
           class="form-control"
+		  <?php if(isset($_GET['del'])){?> disabled <?php }?>
         >
       </div>
     </div>
@@ -512,8 +575,8 @@ lname เป็น textarea
 
         </div>
         <div class="col-sm-2">
-          <a class="btn btn-primary btn-block" href="?url=form_title">
-            ยกเลิกการลบ
+          <a class="btn btn-primary btn-block" href="?url=form_reg">
+            ยกเลิก
           </a>
         </div>
       </div>
@@ -525,7 +588,11 @@ lname เป็น textarea
 
 <?php }else if(isset($_GET['del'])){ ?>
   <?php
-  $q="SELECT * FROM {$prefix}_member WHERE id = '".$_GET['del']."'"; //
+  $q="SELECT * FROM {$prefix}_member M1 
+				LEFT JOIN {$prefix}_title T1 ON (M1.title_id=T1.id)
+				LEFT JOIN {$prefix}_dep D1 ON (M1.dep_id=D1.id)
+		WHERE 
+		        M1.id = '".$_GET['add']."'"; //	
   $reck = $mysqli->query($q); // ทำการ query คำสั่ง sql
   $rsc=$reck->fetch_object();
   #print_r($rsc);
@@ -546,113 +613,7 @@ lname เป็น textarea
   }
 ?>
 
-<?php echo pageex;?>
-
-  <form class="form-horizontal panel panel-default">
-    <div class="panel-heading">
-      <h4>
-        <span class="glyphicon glyphicon-pencil"></span>
-          <?php echo page1;?>
-      </h4>
-    </div>
-    <div class="panel-body">
-      <?php
-      /*
-      แสดง errors (ถ้ามี)
-      ดูคำอธิบายใน inc/form_errors.inc.php
-      */
-      require 'inc/message_errors.inc.php';
-      ?>
-      <div class="form-group <?php
-      /*
-      ถ้ามี key ชื่อ 'title_id' อยู่ใน array $FORM_ERRORS
-      ให้เพิ่ม class 'has-error' เข้าไปใน <div> นี้
-      */
-      if (isset($FORM_ERRORS['title_id'])) {
-        echo 'has-error';
-      }
-      ?>">
-        <label for="title_idInput" class="col-sm-4 control-label">*หัวข้อเรื่อง</label>
-        <div class="col-sm-4">
-          <input
-            type="text"
-            id="title_idInput"
-            name="title_id"
-            value="<?php
-            echo htmlspecialchars($DATA['title_id'], ENT_QUOTES, 'UTF-8');
-            ?>"
-            placeholder="หัวข้อเรื่อง"
-            spellcheck="false"
-            class="form-control"
-            disabled
-          >
-        </div>
-      </div>
-      <div class="form-group <?php
-      /*
-      ถ้ามี key ชื่อ 'lname' อยู่ใน array $FORM_ERRORS
-      ให้เพิ่ม class 'has-error' เข้าไปใน <div> นี้
-      */
-      if (isset($FORM_ERRORS['lname'])) {
-        echo 'has-error';
-      }
-      ?>">
-        <label for="lnameInput" class="col-sm-4 control-label">*รายละเอียด</label>
-        <div class="col-sm-4">
-          <textarea
-               id="lname"
-               name="lname"
-               rows="5"
-               placeholder="รายละเอียด"
-               spellcheck="false"
-               class="form-control"
-               disabled
-             ><?php
-             echo htmlspecialchars($DATA['lname'], ENT_QUOTES, 'UTF-8');
-             ?></textarea>
-        </div>
-      </div>
-      <div class="form-group <?php
-      /*
-      ถ้ามี key ชื่อ 'fname' อยู่ใน array $FORM_ERRORS
-      ให้เพิ่ม class 'has-error' เข้าไปใน <div> นี้
-      */
-      if (isset($FORM_ERRORS['fname'])) {
-        echo 'has-error';
-      }
-      ?>">
-        <label for="nameInput" class="col-sm-4 control-label">*ชื่อ-นามสกุล</label>
-        <div class="col-sm-4">
-          <input
-            type="text"
-            id="fnameInput"
-            name="fname"
-            value="<?php
-            echo htmlspecialchars($DATA['fname'], ENT_QUOTES, 'UTF-8');
-            ?>"
-            placeholder="ชื่อ-นามสกุล"
-            spellcheck="false"
-            class="form-control"
-            disabled
-          >
-        </div>
-      </div>
-      <hr>
-      <div class="form-group">
-        <div class="col-sm-2 col-sm-offset-4">
-          <a class="btn btn-primary btn-block" href="?url=form_reg&del=<?php echo $DATA['id'];?>&delete=<?php echo $DATA['id'];?>">ทำการลบ</a>
-
-        </div>
-        <div class="col-sm-2">
-          <a class="btn btn-primary btn-block" href="?url=form_reg">
-            ยกเลิกการลบ
-          </a>
-        </div>
-      </div>
-    </div>
-  </form>
 <?php }else { #แสดงค่าที่ยังไม่ได้กด ?>
-
 <?php
 $i=1;
 $q="SELECT * FROM {$prefix}_title T1,{$prefix}_member M1 WHERE T1.id = M1.title_id ORDER BY M1.id DESC"; //
@@ -692,7 +653,7 @@ $total=$result->num_rows;  // นับจำนวนถวที่แสด�
                 <td> <?php echo $rs->u_type; ?></td>
                 <td>
         <a class="btn btn-info btn-xs edit_data" href="?url=form_reg&add=<?php echo $rs->id; ?>">แก้ไข</a>
-        <a class="btn btn-info btn-xs del_data" href="?url=form_reg&del=<?php echo $rs->id; ?>">ลบ</a>
+        <a class="btn btn-info btn-xs del_data" href="?url=form_reg&add=<?php echo $rs->id; ?>&del=<?php echo $rs->id; ?>">ลบ</a>
 
 				</td>
             </tr>

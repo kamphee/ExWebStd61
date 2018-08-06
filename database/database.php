@@ -6,7 +6,7 @@ return array (
     'dbdriver' => 'mysqli',
     'username' => 'root',
     'password' => '',
-    'dbname' => 'db_workshow',
+    'dbname' => 'db_kamphee',
     'prefix' => 'tbl',
     'hostname' => 'localhost',
   ),
