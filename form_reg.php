@@ -1,14 +1,12 @@
 <?php
-if(isset($_GET['update'])){ #แสดงค่าที่กด
-$q="SELECT * FROM {$prefix}_title T1 
-				LEFT JOIN {$prefix}_member M1 ON (M1.title_id=T1.id)
-				LEFT JOIN {$prefix}_dep D1 ON (M1.dep_id=D1.id)
-		WHERE 
-		        M1.id = '".$_GET['update']."'"; //	
+if(isset($_GET['add'])){ #แสดงค่าที่กด
+$q="SELECT * FROM tbl_member M1,tbl_title T1,tbl_dep D1 WHERE M1.title_id = T1.id AND M1.dep_id = D1.id AND M1.id = '".$_GET['add']."'"; //
 $reck = $mysqli->query($q); // ทำการ query คำสั่ง sql
 $rsc=$reck->fetch_object();
+
 print_r($rsc);
-@$id = $rsc->id;
+
+@$id = $_GET['add'];
 @$title_id = $rsc->title_id;
 @$title = $rsc->title;
 @$lname = $rsc->lname;
@@ -21,9 +19,7 @@ print_r($rsc);
 @$u_name = $rsc->u_name;
 @$u_pass = $rsc->u_pass;
 @$u_type = $rsc->u_type;
-
 }
-	  
 
 /*
 เราใช้ page2.php เป็นทั้งไฟล์ที่ทำการแสดงผลและบันทึกข้อมูลกระทู้ใหม่
@@ -147,8 +143,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     โดยเราจะ escape ข้อมูลที่มาจากภายนอกทั้งหมดด้วย mysqli::escape_string()
     โดยใช้ฟังก์ชั่น sprintf() ช่วย ดู (inc/main.inc.php สำหรับ sprintf())
     */
-if(isset($_POST['ins']['action']) && $_POST['ins']['action']=='insert'){//หากมีการกำหนด u['action'] และ u['action']=='insert' ให้เพิ่มข้อมูล
-    @$mysqli->query(
+if($_GET['add']=="add"){ #แสดงค่าที่กด
+    $mysqli->query(
       /*
       mysqli::escape_string() จะแปลงตัวอักษรพิเศษ เช่น ' ให้เป็น \' หรือ ''
       ซึ่งทำให้ MySQL Server รู้ว่ามันเป็นข้อมูล ไม่ใช่ delimeter
@@ -192,30 +188,29 @@ if(isset($_POST['ins']['action']) && $_POST['ins']['action']=='insert'){//หา
     $FORM_ERRORS['add'] = "ได้ทำการบันทึกข้อมูลเรียบร้อย";
     $color = "info";
     echo "<META HTTP-EQUIV=\"REFRESH\" CONTENT=\"5; URL=?url=$_GET[url]\">\n";
-    }
-	
-if(isset($_POST['edi']['action']) && $_POST['edi']['action']=='edi'){//หากมีการกำหนด u['action'] และ u['action']=='edi' ให้เพิ่มข้อมูล
+    }else{
       #echo "ทำการแก้ไขข้อมูล";
     /*  ทำการ UPDATE กระทู้
     โดยให้เวลาเพื่อให้กระทู้ย้ายขึ้นมาบนสุด
     และเพิ่มจำนวนความเห็น (num_comments)
     และกำหนดชื่อผู้แสดงความเห็นล่าสุด (last_commented_name) เป็น $DATA['name']
     */
-    @$mysqli->query(
+    $mysqli->query(
       "
       UPDATE {$prefix}_member
       SET
 		title_id = '{$mysqli->escape_string($DATA['title_id'])}',
-        lname    = '{$mysqli->escape_string($DATA['lname'])}',
-        fname    = '{$mysqli->escape_string($DATA['fname'])}',
-		dep_id    = '{$mysqli->escape_string($DATA['dep_id'])}',
-		email    = '{$mysqli->escape_string($DATA['email'])}',
-		tel      = '{$mysqli->escape_string($DATA['tel'])}',
-		address  = '{$mysqli->escape_string($DATA['address'])}',
-		u_name   = '{$mysqli->escape_string($DATA['u_name'])}',
-		u_pass   = '{$mysqli->escape_string($DATA['u_pass'])}',
-		u_type     = '{$mysqli->escape_string($DATA['u_type'])}'
-	  WHERE id   = {$id}
+        lname = '{$mysqli->escape_string($DATA['lname'])}',
+        fname = '{$mysqli->escape_string($DATA['fname'])}',
+		dep_id = '{$mysqli->escape_string($DATA['dep_id'])}',
+		email = '{$mysqli->escape_string($DATA['email'])}',
+		tel = '{$mysqli->escape_string($DATA['tel'])}',
+		address = '{$mysqli->escape_string($DATA['address'])}',
+		u_name = '{$mysqli->escape_string($DATA['u_name'])}',
+		u_pass = '{$mysqli->escape_string($DATA['u_pass'])}',
+		u_type = '{$mysqli->escape_string($DATA['u_type'])}'
+		
+      WHERE id = '$id'
       "
     );
     $FORM_ERRORS['update'] = "ได้ทำการแก้ไขข้อมูลเรียบร้อย";
@@ -258,7 +253,6 @@ if(isset($_POST['edi']['action']) && $_POST['edi']['action']=='edi'){//หาก
 	'u_name'    => $u_name,
 	'u_pass'    => $u_pass,
 	'u_type'    => $u_type
-	
   );
 }
 $TAGS = array('PHP', 'JavaScript', 'SQL', 'HTML', 'CSS');
@@ -268,22 +262,22 @@ $TAGS = array('PHP', 'JavaScript', 'SQL', 'HTML', 'CSS');
 
 ?>
 
-<?php if(isset($_GET['show'])){ #แสดงค่าที่กด ?>
+<?php if(isset($_GET['add'])){ #แสดงค่าที่กด ?>
 
 <?php
 /********** เริ่ม FORM ตั้งกระทู้ใหม่ **********/
 /*
 โดย form นี้จะใช้ method POST ในการส่งข้อมูลไปยัง page2.php
 ข้อมูลที่จะส่งให้กับ page2.php ก็ได้แก่
-title_id เป็น input type=text
-lname เป็น textarea
+title เป็น input type=text
+description เป็น textarea
 และ name เป็น input type=text
 */
 ?>
 
 <?php echo pageex;?>
 
-<form action="<?php echo @$PHP_SELF;?>" method="post" enctype="multipart/form-data" class="form-horizontal panel panel-default">
+<form action="?url=form_reg&add=<?=$_GET['add']?>" method="post" class="form-horizontal panel panel-default">
   <div class="panel-heading">
     <h4>
       <span class="glyphicon glyphicon-pencil"></span>
@@ -298,7 +292,6 @@ lname เป็น textarea
     */
     require 'inc/message_errors.inc.php';
     ?>
-    
 	<div class="form-group <?php
     /*
     ถ้ามี key ชื่อ 'title_id' อยู่ใน array $FORM_ERRORS
@@ -412,12 +405,12 @@ lname เป็น textarea
 			<?php }else{ echo "เลือกรายการ"; }?>	 
 		</option>
 		<?php 
-		$qt="SELECT * FROM {$prefix}_dep"; //
-		$reckt = $mysqli->query($qt); // ทำการ query คำสั่ง sql
+		$qs="SELECT * FROM {$prefix}_dep"; //
+		$recks = $mysqli->query($qs); // ทำการ query คำสั่ง sql
 	  ?>
-		<?php while($rsct=$reckt->fetch_object()){ ?>
-			<option value="<?=$rsct->id?>">
-			<?=$rsct->dep ?>
+		<?php while($rscs=$recks->fetch_object()){ ?>
+			<option value="<?=$rscs->id?>">
+			<?=$rscs->dep ?>
 			</option>
 		<?php } ?>	
 		</select>
@@ -555,32 +548,34 @@ lname เป็น textarea
           name="u_type"
           value="user"
         >    
+		<input
+          type="hidden"
+          id="id"
+          name="id"
+          value="<?php echo $_GET['add'];?>"
+        >    
 		
-    <hr>
+       <hr>
 	         <div class="form-group">
         <div class="col-sm-2 col-sm-offset-4">
            <button type="submit" class="btn btn-primary btn-block">
-
-			<?php if(isset($_GET['action']) && $_GET['action']=='edit'){?>
-				<!--แก้ไขข้อมูล-->
-				ทำการแก้ไข
-				<input type="hidden" name="edi[action]" value="edit">
-				<input type="hidden" name="up[id]" value="<?php echo $id;?>">
-			<?php }else{?>
-				<!--เพิ่มข้อมูล-->
-				เพิ่มสมาชิกใหม่
-				<input type="hidden" name="ins[action]" value="insert">
-			<?php }?>
-
+		<?php if($_GET['add']=="add"){ #แสดงค่าที่กด?>
+			เพิ่มคำนำหน้าชื่อ
+		<?php }else{?>
+			ทำการแก้ไข
+		  <?php }?>
         </button>
 
         </div>
         <div class="col-sm-2">
-          <a class="btn btn-primary btn-block" href="?url=form_title">
+          <a class="btn btn-primary btn-block" href="?url=form_reg">
             ยกเลิกการลบ
           </a>
         </div>
       </div>
+	  
+    <div class="form-group">
+
   </div>
 </form>
 <?php
@@ -629,78 +624,30 @@ lname เป็น textarea
       ?>
       <div class="form-group <?php
       /*
-      ถ้ามี key ชื่อ 'title_id' อยู่ใน array $FORM_ERRORS
+      ถ้ามี key ชื่อ 'title' อยู่ใน array $FORM_ERRORS
       ให้เพิ่ม class 'has-error' เข้าไปใน <div> นี้
       */
-      if (isset($FORM_ERRORS['title_id'])) {
+      if (isset($FORM_ERRORS['title'])) {
         echo 'has-error';
       }
       ?>">
-        <label for="title_idInput" class="col-sm-4 control-label">*หัวข้อเรื่อง</label>
+        <label for="titleInput" class="col-sm-4 control-label">*คำนำหน้าชื่อ</label>
         <div class="col-sm-4">
           <input
             type="text"
-            id="title_idInput"
-            name="title_id"
+            id="titleInput"
+            name="title"
             value="<?php
-            echo htmlspecialchars($DATA['title_id'], ENT_QUOTES, 'UTF-8');
+            echo htmlspecialchars($DATA['title'], ENT_QUOTES, 'UTF-8');
             ?>"
-            placeholder="หัวข้อเรื่อง"
+            placeholder="คำนำหน้าชื่อ"
             spellcheck="false"
             class="form-control"
             disabled
           >
         </div>
       </div>
-      <div class="form-group <?php
-      /*
-      ถ้ามี key ชื่อ 'lname' อยู่ใน array $FORM_ERRORS
-      ให้เพิ่ม class 'has-error' เข้าไปใน <div> นี้
-      */
-      if (isset($FORM_ERRORS['lname'])) {
-        echo 'has-error';
-      }
-      ?>">
-        <label for="lnameInput" class="col-sm-4 control-label">*รายละเอียด</label>
-        <div class="col-sm-4">
-          <textarea
-               id="lname"
-               name="lname"
-               rows="5"
-               placeholder="รายละเอียด"
-               spellcheck="false"
-               class="form-control"
-               disabled
-             ><?php
-             echo htmlspecialchars($DATA['lname'], ENT_QUOTES, 'UTF-8');
-             ?></textarea>
-        </div>
-      </div>
-      <div class="form-group <?php
-      /*
-      ถ้ามี key ชื่อ 'fname' อยู่ใน array $FORM_ERRORS
-      ให้เพิ่ม class 'has-error' เข้าไปใน <div> นี้
-      */
-      if (isset($FORM_ERRORS['fname'])) {
-        echo 'has-error';
-      }
-      ?>">
-        <label for="nameInput" class="col-sm-4 control-label">*ชื่อ-นามสกุล</label>
-        <div class="col-sm-4">
-          <input
-            type="text"
-            id="fnameInput"
-            name="fname"
-            value="<?php
-            echo htmlspecialchars($DATA['fname'], ENT_QUOTES, 'UTF-8');
-            ?>"
-            placeholder="ชื่อ-นามสกุล"
-            spellcheck="false"
-            class="form-control"
-            disabled
-          >
-        </div>
-      </div>
+
       <hr>
       <div class="form-group">
         <div class="col-sm-2 col-sm-offset-4">
@@ -729,11 +676,11 @@ $total=$result->num_rows;  // นับจำนวนถวที่แสด�
                 <br />
                 <div class="table-responsive">
                      <div align="right">
-                       <a class="btn btn-info btn-xs add_data" href="?url=form_reg&show=show">เพิ่ม</a>
+                       <a class="btn btn-info btn-xs add_data" href="?url=form_reg&add=add">เพิ่ม</a>
 
                      </div>
                      <br />
-                     <div id="title_id_table">
+                     <div id="title_table">
                   <table id="example" class="table table-striped table-bordered" style="width:100%">
         <thead>
             <tr>
@@ -755,7 +702,7 @@ $total=$result->num_rows;  // นับจำนวนถวที่แสด�
                 <td><?php echo $rs->fname; ?></td>
                 <td> <?php echo $rs->u_type; ?></td>
                 <td>
-        <a class="btn btn-info btn-xs edit_data" href="?url=form_reg&show=show&up=up&update=<?php echo $rs->id; ?>">แก้ไข</a>
+        <a class="btn btn-info btn-xs edit_data" href="?url=form_reg&add=<?php echo $rs->id; ?>">แก้ไข</a>
         <a class="btn btn-info btn-xs del_data" href="?url=form_reg&del=<?php echo $rs->id; ?>">ลบ</a>
 
 				</td>
@@ -778,11 +725,108 @@ $total=$result->num_rows;  // นับจำนวนถวที่แสด�
 <!-- จบฟอร์มแสดงข้อมูล-->
 
 <?php } ?>
-<?php
-/*
-$qx="SELECT * FROM {$prefix}_title T1,{$prefix}_member M1 WHERE T1.id = M1.title_id and M1.id = '7'"; //"; //
-$reckx = $mysqli->query($qx); // ทำการ query คำสั่ง sql
-$rscx=$reckx->fetch_object();
-print_r($rscx);
-*/
-?>
+
+
+<div id="dataModal" class="modal fade" data-backdrop="false" role="dialog">
+     <div class="modal-dialog">
+          <div class="modal-content">
+               <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">รายละเอียดพนักงาน</h4>
+               </div>
+               <div class="modal-body" id="title_detail">
+               </div>
+               <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">ปิด</button>
+               </div>
+          </div>
+     </div>
+</div>
+
+<div id="add_data_Modal" class="modal fade" data-backdrop="false" role="dialog">
+     <div class="modal-dialog">
+          <div class="modal-content">
+               <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">PHP Ajax Update MySQL Data Through Bootstrap Modal</h4>
+               </div>
+               <div class="modal-body">
+                    <form method="post" id="insert_form">
+                      <div class="form-group <?php
+                      /*
+                      ถ้ามี key ชื่อ 'title' อยู่ใน array $FORM_ERRORS
+                      ให้เพิ่ม class 'has-error' เข้าไปใน <div> นี้
+                      */
+                      if (isset($FORM_ERRORS['title'])) {
+                        echo 'has-error';
+                      }
+                      ?>">
+                         <label>*หัวข้อ</label>
+                         <input
+                                type="text"
+                                id="title"
+                                name="title"
+                                value="<?php
+                                echo htmlspecialchars($DATA['title'], ENT_QUOTES, 'UTF-8');
+                                ?>"
+                                placeholder="หัวข้อ"
+                                spellcheck="false"
+                                class="form-control"
+                              >
+                            </div>
+                            <div class="form-group <?php
+                            /*
+                            ถ้ามี key ชื่อ 'title' อยู่ใน array $FORM_ERRORS
+                            ให้เพิ่ม class 'has-error' เข้าไปใน <div> นี้
+                            */
+                            if (isset($FORM_ERRORS['description'])) {
+                              echo 'has-error';
+                            }
+                            ?>">
+                               <label>*รายละเอียด</label>
+                               <textarea
+                                    id="description"
+                                    name="description"
+                                    rows="5"
+                                    placeholder="รายละเอียด"
+                                    spellcheck="false"
+                                    class="form-control"
+                                  ><?php
+                                  echo htmlspecialchars($DATA['description'], ENT_QUOTES, 'UTF-8');
+                                  ?></textarea>
+                                  </div>
+
+                                  <div class="form-group <?php
+                                  /*
+                                  ถ้ามี key ชื่อ 'title' อยู่ใน array $FORM_ERRORS
+                                  ให้เพิ่ม class 'has-error' เข้าไปใน <div> นี้
+                                  */
+                                  if (isset($FORM_ERRORS['name'])) {
+                                    echo 'has-error';
+                                  }
+                                  ?>">
+                                     <label>*ชื่อ</label>
+                                     <input
+                                            type="text"
+                                            id="name"
+                                            name="name"
+                                            value="<?php
+                                            echo htmlspecialchars($DATA['name'], ENT_QUOTES, 'UTF-8');
+                                            ?>"
+                                            placeholder="ชื่อ"
+                                            spellcheck="false"
+                                            class="form-control"
+                                          >
+                                        </div>
+                         <input type="hidden" name="work01_id" id="work01_id" />
+
+               </div>
+               <div class="modal-footer">
+               <input type="submit" name="insert" id="insert" value="บันทึก" class="btn btn-success" />
+                    </form>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">ปิด</button>
+               </div>
+          </div>
+     </div>
+</div>
+<hr>
